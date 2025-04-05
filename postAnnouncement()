@@ -1,0 +1,27 @@
+async function postAnnouncement() {
+    const scheduleId = document.getElementById("schedule-id").value;
+    const message = document.getElementById("announcement-message").value;
+  
+    // Check required values
+    if (!currentUser || !currentUser.id || !scheduleId || !message) {
+      alert("Missing required info.");
+      return;
+    }
+  
+    const { data, error } = await supabaseClient
+      .from("announcements")
+      .insert([{
+        teacher_id: currentUser.id,
+        schedule_id: parseInt(scheduleId),  // must match INT type in Supabase
+        message: message
+      }]);
+  
+    if (error) {
+      console.error("Insert error:", error.message);
+      document.getElementById("post-status").innerText = "Failed to post: " + error.message;
+    } else {
+      console.log("Announcement posted:", data);
+      document.getElementById("post-status").innerText = "Announcement posted!";
+    }
+  }
+  

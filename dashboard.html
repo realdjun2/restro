@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Instructor Dashboard</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <nav>
+    <h2>Instructor Dashboard</h2>
+    <button id="logout">Logout</button>
+  </nav>
+
+  <section id="selector">
+    <h3>Select Subject and Section</h3>
+    <div class="selectors">
+      <select id="subject">
+        <option value="">Select Subject</option>
+        <option value="IT35">IT35</option>
+        <option value="IT36">IT36</option>
+        <option value="IT37">IT37</option>
+        <option value="IT38">IT38</option>
+        <option value="IT39">IT39</option>
+        <option value="GE10">GE10</option>
+        <option value="GE11">GE11</option>
+        <option value="GE12">GE12</option>
+        <option value="CCS6">CCS6</option>
+        <option value="RSS6">RSS6</option>
+      </select>
+
+      <select id="section">
+        <option value="">Select Section</option>
+        <option value="3A">Block 3A</option>
+        <option value="3B">Block 3B</option>
+        <option value="3C">Block 3C</option>
+      </select>
+    </div>
+  </section>
+
+  <section id="post-announcement">
+    <h3>Post Announcement</h3>
+    <form id="announcement-form">
+      <textarea id="message" placeholder="Write your announcement..." required></textarea>
+      <button type="submit">Post</button>
+    </form>
+  </section>
+
+  <section id="schedule">
+    <h3>My Schedule</h3>
+    <table id="schedule-table">
+      <thead>
+        <tr>
+          <th>Time</th>
+          <th>Mon</th>
+          <th>Tue</th>
+          <th>Wed</th>
+          <th>Thu</th>
+          <th>Fri</th>
+          <th>Sat</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </section>
+
+  <!-- Session check & logout logic -->
+  <script type="module">
+    import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
+
+    const supabase = createClient(
+      "https://pukbullejohkrxcgvwud.supabase.co",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB1a2J1bGxlam9oa3J4Y2d2d3VkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM4MjIwNTUsImV4cCI6MjA1OTM5ODA1NX0.ovymArfcov-lwFQM5_NqLWO8tly-Az8emHps80e2tqo"
+    );
+
+    const { data: { session } } = await supabase.auth.getSession();
+
+    if (!session) {
+      window.location.href = "login.html";
+    } else {
+      console.log("Logged in user:", session.user);
+    }
+
+    document.getElementById("logout").addEventListener("click", async () => {
+      await supabase.auth.signOut();
+      window.location.href = "login.html";
+    });
+
+    // You can now continue your announcement logic below, using `session.user.id` or `session.user.email`
+  </script>
+
+  <!-- Your app logic (posting announcements, etc) -->
+  <script src="script.js"></script>
+</body>
+</html>
