@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>OTP Verification</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .otp-container {
+      max-width: 400px;
+      margin: 80px auto;
+      background: #fff;
+      padding: 2rem;
+      border-radius: 10px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+
+    .otp-container input {
+      width: 100%;
+      padding: 12px;
+      font-size: 1.1rem;
+      margin: 1rem 0;
+    }
+
+    .otp-container button {
+      padding: 12px;
+      font-size: 1rem;
+      width: 100%;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    .otp-container button:hover {
+      background-color: #45a049;
+    }
+
+    .alert {
+      margin-top: 1rem;
+      color: red;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <div class="otp-container">
+    <h2>Enter OTP</h2>
+    <p>Check your email for the 6-digit verification code.</p>
+    <input type="text" id="otp" placeholder="Enter OTP" maxlength="6" />
+    <button onclick="verifyOTP()">Verify</button>
+    <div id="message" class="alert"></div>
+  </div>
+
+  <!-- 🔐 External script now handles everything -->
+  <script type="module" src="otp.js"></script>
+</body>
+</html>

@@ -1,29 +1,39 @@
-import { supabase } from './supabaseClient.js';
-
-document.getElementById("registerBtn").addEventListener("click", async () => {
+window.register = async function (e) {
+    e.preventDefault();
+    
+    const name = document.getElementById("name").value.trim();
     const email = document.getElementById("email").value.trim();
     const password = document.getElementById("password").value.trim();
-    const name = document.getElementById("name").value.trim();
-    const role = document.getElementById("role").value.trim();
-
-    if (!email.endsWith("@nbsc.edu.ph")) {
-        alert("Only @nbsc.edu.ph emails are allowed.");
-        return;
+    const messageDiv = document.getElementById("message");
+    messageDiv.textContent = "";
+    messageDiv.style.color = "red"; // default color for errors
+  
+    // Basic validation
+    if (!name || !email || !password) {
+      messageDiv.textContent = "Please fill in all fields.";
+      return;
     }
-    
-
-    const { data, error } = await supabase.auth.signUp({
+  
+    try {
+      const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
-            data: { name, role }, // Custom user metadata
-            emailRedirectTo: "http://localhost/Class%20Schedule%20System_nbsc/login.html"
-        }
-    });
-
-    if (error) {
-        alert("Registration error: " + error.message);
-    } else {
-        alert("Registration successful! Please check your email to confirm.");
+          data: { name },
+          emailRedirectTo: window.location.origin + "/verify.html" // optional redirect for email
+        },
+      });
+  
+      if (error) {
+        messageDiv.textContent = error.message;
+        return;
+      }
+  
+      messageDiv.style.color = "green";
+      messageDiv.textContent = "Registered successfully! Please check your email to verify.";
+    } catch (err) {
+      messageDiv.textContent = "Something went wrong.";
+      console.error(err);
     }
-});
+  };
+  

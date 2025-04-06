@@ -4,78 +4,100 @@
   <meta charset="UTF-8" />
   <title>Register</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
   <style>
-    body { font-family: sans-serif; background: #f4f4f4; padding: 20px; display: flex; justify-content: center; align-items: center; height: 100vh; }
-    .container { max-width: 400px; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); width: 100%; }
-    input, button { width: 100%; margin-top: 10px; padding: 10px; }
-    .alert { color: red; margin-top: 10px; }
+    .password-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .password-wrapper input {
+      width: 100%;
+      padding-right: 2.5rem;
+    }
+
+    .toggle-password {
+      position: absolute;
+      right: 10px;
+      cursor: pointer;
+      color: #666;
+      font-size: 1.1rem;
+    }
+
+    .alert {
+      color: red;
+      margin-top: 1rem;
+      text-align: center;
+    }
   </style>
 </head>
 <body>
-<div class="container">
-  <h2>Create Your Account</h2>
-  <input type="text" id="name" placeholder="Full Name" />
-  <input type="email" id="email" placeholder="Email (@nbsc.edu.ph only)" />
-  <input type="password" id="password" placeholder="Password" />
-  <select id="role">
-    <option value="">Select Role</option>
-    <option value="teacher">Teacher</option>
-    <option value="student">Student</option>
-  </select>
-  <button onclick="register()">Register</button>
-  <p><a href="login.html">Already have an account? Login</a></p>
-  <div class="alert" id="error"></div>
-</div>
+  <div class="register-container">
+    <h2>Register</h2>
+    <form onsubmit="register(event)">
+      <input type="text" id="name" placeholder="Full Name" required />
+      <input type="email" id="email" placeholder="Email" required />
 
-<script type="module">
-  import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
+      <div class="password-wrapper">
+        <input type="password" id="password" placeholder="Password" required />
+        <i class="fa-solid fa-eye toggle-password" id="togglePassword"></i>
+      </div>
 
-  const supabase = createClient(
-    "https://pukbullejohkrxcgvwud.supabase.co",
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB1a2J1bGxlam9oa3J4Y2d2d3VkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM4MjIwNTUsImV4cCI6MjA1OTM5ODA1NX0.ovymArfcov-lwFQM5_NqLWO8tly-Az8emHps80e2tqo" // Replace this with your real anon/public key from Supabase
-  );
+      <button type="submit">Register</button>
 
-  window.register = async function () {
-    const name = document.getElementById('name').value.trim();
-    const email = document.getElementById('email').value.trim();
-    const password = document.getElementById('password').value.trim();
-    const role = document.getElementById('role').value;
-    const errorDiv = document.getElementById("error");
+      <p style="text-align:center; margin-top: 1rem;">
+        <a href="login.html">Already have an account? Login</a>
+      </p>
 
-    if (!email.endsWith("@nbsc.edu.ph")) {
-      errorDiv.textContent = "Only @nbsc.edu.ph emails are allowed.";
-      return;
-    }
+      <div id="message" class="alert"></div>
+    </form>
+  </div>
 
-    if (!role) {
-      errorDiv.textContent = "Please select a role.";
-      return;
-    }
+  <script type="module">
+    import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
 
-    const { data, error } = await supabase.auth.signUp({ email, password });
-    if (error) {
-      errorDiv.textContent = error.message;
-      return;
-    }
+    const supabase = createClient(
+      "https://pukbullejohkrxcgvwud.supabase.co",
+      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB1a2J1bGxlam9oa3J4Y2d2d3VkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM4MjIwNTUsImV4cCI6MjA1OTM5ODA1NX0.ovymArfcov-lwFQM5_NqLWO8tly-Az8emHps80e2tqo"
+    );
 
-    const userId = data.user?.id;
-    if (!userId) {
-      errorDiv.textContent = "Registration failed.";
-      return;
-    }
+    window.register = async function (e) {
+      e.preventDefault();
+      const name = document.getElementById("name").value.trim();
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value.trim();
+      const messageDiv = document.getElementById("message");
+      messageDiv.textContent = "";
 
-    const { error: insertError } = await supabase.from("users").insert([
-      { id: userId, email, name, role }
-    ]);
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: { name },
+        },
+      });
 
-    if (insertError) {
-      errorDiv.textContent = insertError.message;
-      return;
-    }
+      if (error) {
+        messageDiv.textContent = error.message;
+        return;
+      }
 
-    alert("Registered successfully. Please check your email to verify.");
-    window.location.href = "login.html";
-  };
-</script>
+      messageDiv.style.color = "green";
+      messageDiv.textContent = "Registered successfully! Please verify your email.";
+    };
+
+    // Toggle password visibility
+    const toggle = document.getElementById("togglePassword");
+    const password = document.getElementById("password");
+
+    toggle.addEventListener("click", () => {
+      const isHidden = password.type === "password";
+      password.type = isHidden ? "text" : "password";
+      toggle.classList.toggle("fa-eye");
+      toggle.classList.toggle("fa-eye-slash");
+    });
+  </script>
 </body>
 </html>

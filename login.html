@@ -4,47 +4,20 @@
   <meta charset="UTF-8" />
   <title>Login</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <style>
-    body { font-family: sans-serif; background: #f4f4f4; padding: 20px; display: flex; justify-content: center; align-items: center; height: 100vh; }
-    .container { max-width: 400px; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); width: 100%; }
-    input, button { width: 100%; margin-top: 10px; padding: 10px; }
-    .alert { color: red; margin-top: 10px; }
-  </style>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-<div class="container">
-  <h2>Login</h2>
-  <input type="email" id="email" placeholder="Email" />
-  <input type="password" id="password" placeholder="Password" />
-  <button onclick="login()">Login</button>
-  <p><a href="register.html">Don't have an account? Register</a></p>
-  <div class="alert" id="error"></div>
-</div>
+  <div class="login-container">
+    <h2>Login</h2>
+    <form id="loginForm">
+      <input type="email" id="email" placeholder="Email" required />
+      <input type="password" id="password" placeholder="Password" required />
+      <button type="submit">Login</button>
+      <p style="text-align: center;">Don't have an account? <a href="register.html">Register</a></p>
+      <div class="alert" id="message"></div>
+    </form>
+  </div>
 
-<script type="module">
-  import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
-
-  const supabase = createClient(
-    "https://pukbullejohkrxcgvwud.supabase.co",
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB1a2J1bGxlam9oa3J4Y2d2d3VkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM4MjIwNTUsImV4cCI6MjA1OTM5ODA1NX0.ovymArfcov-lwFQM5_NqLWO8tly-Az8emHps80e2tqo" // Replace this with your real anon/public key from Supabase
-  );
-
-  window.login = async function () {
-    const email = document.getElementById("email").value.trim();
-    const password = document.getElementById("password").value.trim();
-    const errorDiv = document.getElementById("error");
-
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-
-    if (error) {
-      errorDiv.textContent = error.message;
-      return;
-    }
-
-    // Redirect to dashboard or wherever
-    alert("Login successful!");
-    window.location.href = "dashboard.html";
-  };
-</script>
+  <script type="module" src="login.js"></script>
 </body>
 </html>

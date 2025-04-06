@@ -41,7 +41,7 @@
   <section id="post-announcement">
     <h3>Post Announcement</h3>
     <form id="announcement-form">
-      <textarea id="message" placeholder="Write your announcement..." required></textarea>
+      <textarea id="announcement" placeholder="Write your announcement..." required></textarea>
       <button type="submit">Post</button>
     </form>
   </section>
@@ -63,8 +63,7 @@
       <tbody></tbody>
     </table>
   </section>
-
-  <!-- Session check & logout logic -->
+ 
   <script type="module">
     import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
 
@@ -86,10 +85,38 @@
       window.location.href = "login.html";
     });
 
-    // You can now continue your announcement logic below, using `session.user.id` or `session.user.email`
-  </script>
+    // Announcement submission logic with error handling
+    document.getElementById("announcement-form").addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const announcementText = document.getElementById("announcement").value.trim();
+      
+      if (!announcementText) {
+        console.error("Announcement cannot be empty.");
+        alert("Please write an announcement before posting.");
+        return;
+      }
 
-  <!-- Your app logic (posting announcements, etc) -->
+      try {
+        console.log("Posting Announcement:", announcementText);
+        // Handle the logic to store the announcement in the database here (e.g., Supabase)
+        const { data, error } = await supabase
+          .from('announcements') // Assuming you have an 'announcements' table
+          .insert([{ announcement_text: announcementText, posted_at: new Date() }]);
+
+        if (error) {
+          console.error("Error posting announcement:", error.message);
+          alert("Failed to post announcement. Try again.");
+        } else {
+          console.log("Announcement posted successfully:", data);
+          alert("Announcement posted successfully.");
+        }
+      } catch (err) {
+        console.error("Unexpected error:", err);
+        alert("An unexpected error occurred.");
+      }
+    });
+  </script>
+ 
   <script src="script.js"></script>
 </body>
 </html>
