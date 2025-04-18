@@ -2,11 +2,11 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>OTP Verification</title>
+  <title>Verify You're Not a Robot</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <link rel="stylesheet" href="style.css" />
   <style>
-    .otp-container {
+    .captcha-container {
       max-width: 400px;
       margin: 80px auto;
       background: #fff;
@@ -16,14 +16,7 @@
       text-align: center;
     }
 
-    .otp-container input {
-      width: 100%;
-      padding: 12px;
-      font-size: 1.1rem;
-      margin: 1rem 0;
-    }
-
-    .otp-container button {
+    .captcha-container button {
       padding: 12px;
       font-size: 1rem;
       width: 100%;
@@ -34,7 +27,7 @@
       cursor: pointer;
     }
 
-    .otp-container button:hover {
+    .captcha-container button:hover {
       background-color: #45a049;
     }
 
@@ -46,15 +39,19 @@
   </style>
 </head>
 <body>
-  <div class="otp-container">
-    <h2>Enter OTP</h2>
-    <p>Check your email for the 6-digit verification code.</p>
-    <input type="text" id="otp" placeholder="Enter OTP" maxlength="6" />
-    <button onclick="verifyOTP()">Verify</button>
+  <div class="captcha-container">
+    <h2>Verify You're Not a Robot</h2>
+    <p>Please complete the CAPTCHA to proceed.</p>
+    
+    <!-- Google reCAPTCHA Widget -->
+    <div class="g-recaptcha" data-sitekey="your-site-key-here"></div>
+
+    <button onclick="verifyCaptcha()">Verify</button>
     <div id="message" class="alert"></div>
   </div>
 
-  <!-- 🔐 External script now handles everything -->
-  <script type="module" src="otp.js"></script>
+  <!-- External script -->
+  <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+  <script type="module" src="captcha.js"></script>
 </body>
 </html>

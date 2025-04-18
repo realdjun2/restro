@@ -4,32 +4,124 @@
   <meta charset="UTF-8" />
   <title>Register</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
   <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #1e1e2f;
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .register-container {
+      background: #29293d;
+      padding: 40px;
+      border-radius: 16px;
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+    }
+
+    h2 {
+      margin-bottom: 24px;
+      font-size: 28px;
+      font-weight: 600;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="password"] {
+      width: 100%;
+      padding: 14px 16px;
+      margin-bottom: 16px;
+      background: #1e1e2f;
+      border: 1px solid #444;
+      border-radius: 10px;
+      color: #fff;
+      font-size: 15px;
+    }
+
+    input:focus {
+      border-color: #00aaff;
+      outline: none;
+    }
+
     .password-wrapper {
       position: relative;
-      display: flex;
-      align-items: center;
     }
 
     .password-wrapper input {
-      width: 100%;
-      padding-right: 2.5rem;
+      padding-right: 40px;
     }
 
     .toggle-password {
       position: absolute;
-      right: 10px;
+      right: 12px;
+      top: 50%;
+      transform: translateY(-50%);
       cursor: pointer;
-      color: #666;
+      color: #aaa;
       font-size: 1.1rem;
     }
 
+    button {
+      width: 100%;
+      padding: 14px;
+      background-color: #00aaff;
+      border: none;
+      border-radius: 10px;
+      color: #fff;
+      font-size: 16px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #007acc;
+    }
+
+    p {
+      margin-top: 16px;
+      font-size: 14px;
+    }
+
+    a {
+      color: #00aaff;
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
     .alert {
-      color: red;
-      margin-top: 1rem;
+      margin-top: 15px;
+      font-size: 14px;
       text-align: center;
+    }
+
+    .alert.success {
+      background-color: #28a745;
+      padding: 10px;
+      border-radius: 8px;
+      color: white;
+    }
+
+    .alert.error {
+      background-color: #dc3545;
+      padding: 10px;
+      border-radius: 8px;
+      color: white;
     }
   </style>
 </head>
@@ -47,10 +139,7 @@
 
       <button type="submit">Register</button>
 
-      <p style="text-align:center; margin-top: 1rem;">
-        <a href="login.html">Already have an account? Login</a>
-      </p>
-
+      <p><a href="login.html">Already have an account? Login</a></p>
       <div id="message" class="alert"></div>
     </form>
   </div>
@@ -59,8 +148,8 @@
     import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
 
     const supabase = createClient(
-      "https://pukbullejohkrxcgvwud.supabase.co",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB1a2J1bGxlam9oa3J4Y2d2d3VkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM4MjIwNTUsImV4cCI6MjA1OTM5ODA1NX0.ovymArfcov-lwFQM5_NqLWO8tly-Az8emHps80e2tqo"
+      "https://pzmjrsqltbsuuunocbvu.supabase.co",
+      "your-anon-key-here"
     );
 
     window.register = async function (e) {
@@ -69,9 +158,11 @@
       const email = document.getElementById("email").value.trim();
       const password = document.getElementById("password").value.trim();
       const messageDiv = document.getElementById("message");
-      messageDiv.textContent = "";
 
-      const { data, error } = await supabase.auth.signUp({
+      messageDiv.textContent = "";
+      messageDiv.className = "alert";
+
+      const { error } = await supabase.auth.signUp({
         email,
         password,
         options: {
@@ -81,22 +172,22 @@
 
       if (error) {
         messageDiv.textContent = error.message;
+        messageDiv.classList.add("error");
         return;
       }
 
-      messageDiv.style.color = "green";
       messageDiv.textContent = "Registered successfully! Please verify your email.";
+      messageDiv.classList.add("success");
     };
 
-    // Toggle password visibility
-    const toggle = document.getElementById("togglePassword");
-    const password = document.getElementById("password");
+    document.getElementById("togglePassword").addEventListener("click", () => {
+      const passwordInput = document.getElementById("password");
+      const isHidden = passwordInput.type === "password";
+      passwordInput.type = isHidden ? "text" : "password";
 
-    toggle.addEventListener("click", () => {
-      const isHidden = password.type === "password";
-      password.type = isHidden ? "text" : "password";
-      toggle.classList.toggle("fa-eye");
-      toggle.classList.toggle("fa-eye-slash");
+      const icon = document.getElementById("togglePassword");
+      icon.classList.toggle("fa-eye");
+      icon.classList.toggle("fa-eye-slash");
     });
   </script>
 </body>

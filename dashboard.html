@@ -3,120 +3,480 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Instructor Dashboard</title>
-  <link rel="stylesheet" href="style.css">
-</head>
-<body>
-  <nav>
-    <h2>Instructor Dashboard</h2>
-    <button id="logout">Logout</button>
-  </nav>
-
-  <section id="selector">
-    <h3>Select Subject and Section</h3>
-    <div class="selectors">
-      <select id="subject">
-        <option value="">Select Subject</option>
-        <option value="IT35">IT35</option>
-        <option value="IT36">IT36</option>
-        <option value="IT37">IT37</option>
-        <option value="IT38">IT38</option>
-        <option value="IT39">IT39</option>
-        <option value="GE10">GE10</option>
-        <option value="GE11">GE11</option>
-        <option value="GE12">GE12</option>
-        <option value="CCS6">CCS6</option>
-        <option value="RSS6">RSS6</option>
-      </select>
-
-      <select id="section">
-        <option value="">Select Section</option>
-        <option value="3A">Block 3A</option>
-        <option value="3B">Block 3B</option>
-        <option value="3C">Block 3C</option>
-      </select>
-    </div>
-  </section>
-
-  <section id="post-announcement">
-    <h3>Post Announcement</h3>
-    <form id="announcement-form">
-      <textarea id="announcement" placeholder="Write your announcement..." required></textarea>
-      <button type="submit">Post</button>
-    </form>
-  </section>
-
-  <section id="schedule">
-    <h3>My Schedule</h3>
-    <table id="schedule-table">
-      <thead>
-        <tr>
-          <th>Time</th>
-          <th>Mon</th>
-          <th>Tue</th>
-          <th>Wed</th>
-          <th>Thu</th>
-          <th>Fri</th>
-          <th>Sat</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
-  </section>
- 
-  <script type="module">
-    import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
-
-    const supabase = createClient(
-      "https://pukbullejohkrxcgvwud.supabase.co",
-      "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB1a2J1bGxlam9oa3J4Y2d2d3VkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM4MjIwNTUsImV4cCI6MjA1OTM5ODA1NX0.ovymArfcov-lwFQM5_NqLWO8tly-Az8emHps80e2tqo"
-    );
-
-    const { data: { session } } = await supabase.auth.getSession();
-
-    if (!session) {
-      window.location.href = "login.html";
-    } else {
-      console.log("Logged in user:", session.user);
-    }
-
-    document.getElementById("logout").addEventListener("click", async () => {
-      await supabase.auth.signOut();
-      window.location.href = "login.html";
-    });
-
-    // Announcement submission logic with error handling
-    document.getElementById("announcement-form").addEventListener("submit", async (event) => {
-      event.preventDefault();
-      const announcementText = document.getElementById("announcement").value.trim();
-      
-      if (!announcementText) {
-        console.error("Announcement cannot be empty.");
-        alert("Please write an announcement before posting.");
-        return;
-      }
-
-      try {
-        console.log("Posting Announcement:", announcementText);
-        // Handle the logic to store the announcement in the database here (e.g., Supabase)
-        const { data, error } = await supabase
-          .from('announcements') // Assuming you have an 'announcements' table
-          .insert([{ announcement_text: announcementText, posted_at: new Date() }]);
-
-        if (error) {
-          console.error("Error posting announcement:", error.message);
-          alert("Failed to post announcement. Try again.");
-        } else {
-          console.log("Announcement posted successfully:", data);
-          alert("Announcement posted successfully.");
+  <title>Food Order Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            dark: '#121212',
+            primary: '#1f1f2e',
+            secondary: '#1e1e2f',
+            accent: '#4f46e5',
+            success: '#10b981',
+            warning: '#f59e0b',
+            danger: '#ef4444',
+            info: '#3b82f6'
+          },
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+          },
         }
-      } catch (err) {
-        console.error("Unexpected error:", err);
-        alert("An unexpected error occurred.");
       }
+    }
+  </script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f5f7fa;
+      color: #1f2937;
+    }
+    
+    .sidebar {
+      transition: all 0.3s ease;
+    }
+    
+    .order-card {
+      transition: all 0.2s ease;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    
+    .order-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    
+    .status-badge {
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.25rem;
+    }
+    
+    .chart-container {
+      height: 300px;
+    }
+    
+    .animate-pulse {
+      animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+    }
+    
+    @keyframes pulse {
+      0%, 100% {
+        opacity: 1;
+      }
+      50% {
+        opacity: 0.5;
+      }
+    }
+    
+    .skeleton {
+      background-color: #e5e7eb;
+      border-radius: 0.25rem;
+    }
+  </style>
+</head>
+<body class="bg-gray-50">
+  <div class="flex h-screen overflow-hidden">
+    <!-- Sidebar -->
+    <div class="sidebar w-64 bg-white shadow-lg hidden md:block">
+      <div class="p-4 border-b border-gray-200">
+        <h1 class="text-xl font-bold text-gray-800 flex items-center">
+          <i class="fas fa-utensils text-accent mr-2"></i>
+          FoodDash Pro
+        </h1>
+      </div>
+      <nav class="p-4">
+        <ul class="space-y-2">
+          <li>
+            <a href="#" class="flex items-center p-2 text-gray-700 rounded-lg bg-gray-100">
+              <i class="fas fa-tachometer-alt mr-3 text-accent"></i>
+              <span>Dashboard</span>
+            </a>
+          </li>
+          <li>
+            <a href="#" class="flex items-center p-2 text-gray-700 rounded-lg hover:bg-gray-100">
+              <i class="fas fa-list-alt mr-3 text-gray-500"></i>
+              <span>Orders</span>
+              <span class="ml-auto bg-accent text-white text-xs font-medium px-2 py-0.5 rounded-full">24</span>
+            </a>
+          </li>
+          <li>
+            <a href="#" class="flex items-center p-2 text-gray-700 rounded-lg hover:bg-gray-100">
+              <i class="fas fa-utensils mr-3 text-gray-500"></i>
+              <span>Menu Items</span>
+            </a>
+          </li>
+          <li>
+            <a href="#" class="flex items-center p-2 text-gray-700 rounded-lg hover:bg-gray-100">
+              <i class="fas fa-users mr-3 text-gray-500"></i>
+              <span>Customers</span>
+            </a>
+          </li>
+          <li>
+            <a href="#" class="flex items-center p-2 text-gray-700 rounded-lg hover:bg-gray-100">
+              <i class="fas fa-chart-line mr-3 text-gray-500"></i>
+              <span>Analytics</span>
+            </a>
+          </li>
+          <li>
+            <a href="#" class="flex items-center p-2 text-gray-700 rounded-lg hover:bg-gray-100">
+              <i class="fas fa-cog mr-3 text-gray-500"></i>
+              <span>Settings</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+    </div>
+    
+    <!-- Main Content -->
+    <div class="flex-1 overflow-auto">
+      <!-- Top Navigation -->
+      <header class="bg-white shadow-sm">
+        <div class="px-4 py-3 flex items-center justify-between">
+          <div class="flex items-center">
+            <button class="md:hidden text-gray-500 mr-2">
+              <i class="fas fa-bars text-xl"></i>
+            </button>
+            <h2 class="text-lg font-semibold text-gray-800">Order Dashboard</h2>
+          </div>
+          <div class="flex items-center space-x-4">
+            <div class="relative">
+              <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+              <input type="text" placeholder="Search orders..." class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent">
+            </div>
+            <button class="relative text-gray-500 hover:text-gray-700">
+              <i class="fas fa-bell text-xl"></i>
+              <span class="absolute top-0 right-0 h-2 w-2 rounded-full bg-danger"></span>
+            </button>
+            <div class="flex items-center">
+              <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="User" class="w-8 h-8 rounded-full mr-2">
+              <span class="text-sm font-medium hidden md:inline">John Doe</span>
+            </div>
+          </div>
+        </div>
+      </header>
+      
+      <!-- Dashboard Content -->
+      <main class="p-4 md:p-6">
+        <!-- Stats Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+          <div class="bg-white rounded-lg shadow p-4">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-sm font-medium text-gray-500">Total Orders</p>
+                <h3 class="text-2xl font-bold mt-1">1,248</h3>
+                <p class="text-xs text-success mt-1 flex items-center">
+                  <i class="fas fa-arrow-up mr-1"></i>
+                  <span>12% from last month</span>
+                </p>
+              </div>
+              <div class="bg-accent bg-opacity-10 p-3 rounded-full">
+                <i class="fas fa-shopping-bag text-accent text-xl"></i>
+              </div>
+            </div>
+          </div>
+          
+          <div class="bg-white rounded-lg shadow p-4">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-sm font-medium text-gray-500">Revenue</p>
+                <h3 class="text-2xl font-bold mt-1">$8,420</h3>
+                <p class="text-xs text-success mt-1 flex items-center">
+                  <i class="fas fa-arrow-up mr-1"></i>
+                  <span>18% from last month</span>
+                </p>
+              </div>
+              <div class="bg-success bg-opacity-10 p-3 rounded-full">
+                <i class="fas fa-dollar-sign text-success text-xl"></i>
+              </div>
+            </div>
+          </div>
+          
+          <div class="bg-white rounded-lg shadow p-4">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-sm font-medium text-gray-500">Pending Orders</p>
+                <h3 class="text-2xl font-bold mt-1">24</h3>
+                <p class="text-xs text-danger mt-1 flex items-center">
+                  <i class="fas fa-arrow-down mr-1"></i>
+                  <span>3% from last month</span>
+                </p>
+              </div>
+              <div class="bg-warning bg-opacity-10 p-3 rounded-full">
+                <i class="fas fa-clock text-warning text-xl"></i>
+              </div>
+            </div>
+          </div>
+          
+          <div class="bg-white rounded-lg shadow p-4">
+            <div class="flex items-center justify-between">
+              <div>
+                <p class="text-sm font-medium text-gray-500">Avg. Order Value</p>
+                <h3 class="text-2xl font-bold mt-1">$24.50</h3>
+                <p class="text-xs text-success mt-1 flex items-center">
+                  <i class="fas fa-arrow-up mr-1"></i>
+                  <span>5% from last month</span>
+                </p>
+              </div>
+              <div class="bg-info bg-opacity-10 p-3 rounded-full">
+                <i class="fas fa-chart-pie text-info text-xl"></i>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Charts and Recent Orders -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+          <!-- Order Chart -->
+          <div class="lg:col-span-2 bg-white rounded-lg shadow p-4">
+            <div class="flex items-center justify-between mb-4">
+              <h3 class="text-lg font-semibold">Order Analytics</h3>
+              <div class="flex space-x-2">
+                <button class="px-3 py-1 text-xs bg-gray-100 rounded-md">Day</button>
+                <button class="px-3 py-1 text-xs bg-accent text-white rounded-md">Week</button>
+                <button class="px-3 py-1 text-xs bg-gray-100 rounded-md">Month</button>
+              </div>
+            </div>
+            <div class="chart-container">
+              <!-- Placeholder for chart -->
+              <div class="w-full h-full flex items-center justify-center bg-gray-50 rounded-lg">
+                <div class="text-center">
+                  <i class="fas fa-chart-bar text-4xl text-gray-300 mb-2"></i>
+                  <p class="text-gray-500">Order chart will appear here</p>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Top Items -->
+          <div class="bg-white rounded-lg shadow p-4">
+            <h3 class="text-lg font-semibold mb-4">Top Ordered Items</h3>
+            <div class="space-y-4">
+              <div class="flex items-center">
+                <div class="w-8 h-8 rounded-full bg-accent bg-opacity-10 flex items-center justify-center mr-3">
+                  <i class="fas fa-hamburger text-accent"></i>
+                </div>
+                <div class="flex-1">
+                  <p class="text-sm font-medium">Cheeseburger</p>
+                  <div class="w-full bg-gray-200 rounded-full h-1.5 mt-1">
+                    <div class="bg-accent h-1.5 rounded-full" style="width: 85%"></div>
+                  </div>
+                </div>
+                <span class="text-sm font-medium ml-2">124</span>
+              </div>
+              
+              <div class="flex items-center">
+                <div class="w-8 h-8 rounded-full bg-success bg-opacity-10 flex items-center justify-center mr-3">
+                  <i class="fas fa-pizza-slice text-success"></i>
+                </div>
+                <div class="flex-1">
+                  <p class="text-sm font-medium">Pepperoni Pizza</p>
+                  <div class="w-full bg-gray-200 rounded-full h-1.5 mt-1">
+                    <div class="bg-success h-1.5 rounded-full" style="width: 72%"></div>
+                  </div>
+                </div>
+                <span class="text-sm font-medium ml-2">104</span>
+              </div>
+              
+              <div class="flex items-center">
+                <div class="w-8 h-8 rounded-full bg-warning bg-opacity-10 flex items-center justify-center mr-3">
+                  <i class="fas fa-drumstick-bite text-warning"></i>
+                </div>
+                <div class="flex-1">
+                  <p class="text-sm font-medium">Chicken Wings</p>
+                  <div class="w-full bg-gray-200 rounded-full h-1.5 mt-1">
+                    <div class="bg-warning h-1.5 rounded-full" style="width: 65%"></div>
+                  </div>
+                </div>
+                <span class="text-sm font-medium ml-2">94</span>
+              </div>
+              
+              <div class="flex items-center">
+                <div class="w-8 h-8 rounded-full bg-info bg-opacity-10 flex items-center justify-center mr-3">
+                  <i class="fas fa-ice-cream text-info"></i>
+                </div>
+                <div class="flex-1">
+                  <p class="text-sm font-medium">Ice Cream</p>
+                  <div class="w-full bg-gray-200 rounded-full h-1.5 mt-1">
+                    <div class="bg-info h-1.5 rounded-full" style="width: 58%"></div>
+                  </div>
+                </div>
+                <span class="text-sm font-medium ml-2">82</span>
+              </div>
+              
+              <div class="flex items-center">
+                <div class="w-8 h-8 rounded-full bg-danger bg-opacity-10 flex items-center justify-center mr-3">
+                  <i class="fas fa-coffee text-danger"></i>
+                </div>
+                <div class="flex-1">
+                  <p class="text-sm font-medium">Coffee</p>
+                  <div class="w-full bg-gray-200 rounded-full h-1.5 mt-1">
+                    <div class="bg-danger h-1.5 rounded-full" style="width: 45%"></div>
+                  </div>
+                </div>
+                <span class="text-sm font-medium ml-2">72</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Recent Orders -->
+        <div class="bg-white rounded-lg shadow overflow-hidden">
+          <div class="px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+            <h3 class="text-lg font-semibold">Recent Orders</h3>
+            <button class="text-sm text-accent font-medium flex items-center">
+              <span>View All</span>
+              <i class="fas fa-chevron-right ml-1 text-xs"></i>
+            </button>
+          </div>
+          <div class="divide-y divide-gray-200">
+            <!-- Order 1 -->
+            <div class="p-4 hover:bg-gray-50 transition-colors duration-150 order-card">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                  <div class="w-10 h-10 rounded-full bg-accent bg-opacity-10 flex items-center justify-center mr-3">
+                    <i class="fas fa-hamburger text-accent"></i>
+                  </div>
+                  <div>
+                    <p class="font-medium">Order #ORD-00123</p>
+                    <p class="text-sm text-gray-500">John Smith • 12:30 PM</p>
+                  </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                  <div>
+                    <p class="text-sm font-medium">$24.99</p>
+                    <p class="text-xs text-gray-500">2 items</p>
+                  </div>
+                  <span class="status-badge bg-info text-white">Preparing</span>
+                  <button class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-ellipsis-v"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Order 2 -->
+            <div class="p-4 hover:bg-gray-50 transition-colors duration-150 order-card">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                  <div class="w-10 h-10 rounded-full bg-success bg-opacity-10 flex items-center justify-center mr-3">
+                    <i class="fas fa-pizza-slice text-success"></i>
+                  </div>
+                  <div>
+                    <p class="font-medium">Order #ORD-00124</p>
+                    <p class="text-sm text-gray-500">Sarah Johnson • 1:15 PM</p>
+                  </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                  <div>
+                    <p class="text-sm font-medium">$18.50</p>
+                    <p class="text-xs text-gray-500">1 item</p>
+                  </div>
+                  <span class="status-badge bg-success text-white">Delivered</span>
+                  <button class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-ellipsis-v"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Order 3 -->
+            <div class="p-4 hover:bg-gray-50 transition-colors duration-150 order-card">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                  <div class="w-10 h-10 rounded-full bg-warning bg-opacity-10 flex items-center justify-center mr-3">
+                    <i class="fas fa-drumstick-bite text-warning"></i>
+                  </div>
+                  <div>
+                    <p class="font-medium">Order #ORD-00125</p>
+                    <p class="text-sm text-gray-500">Michael Brown • 2:45 PM</p>
+                  </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                  <div>
+                    <p class="text-sm font-medium">$32.75</p>
+                    <p class="text-xs text-gray-500">3 items</p>
+                  </div>
+                  <span class="status-badge bg-warning text-white">Pending</span>
+                  <button class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-ellipsis-v"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Order 4 -->
+            <div class="p-4 hover:bg-gray-50 transition-colors duration-150 order-card">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                  <div class="w-10 h-10 rounded-full bg-danger bg-opacity-10 flex items-center justify-center mr-3">
+                    <i class="fas fa-coffee text-danger"></i>
+                  </div>
+                  <div>
+                    <p class="font-medium">Order #ORD-00126</p>
+                    <p class="text-sm text-gray-500">Emily Davis • 3:30 PM</p>
+                  </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                  <div>
+                    <p class="text-sm font-medium">$12.99</p>
+                    <p class="text-xs text-gray-500">2 items</p>
+                  </div>
+                  <span class="status-badge bg-accent text-white">On the way</span>
+                  <button class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-ellipsis-v"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Order 5 -->
+            <div class="p-4 hover:bg-gray-50 transition-colors duration-150 order-card">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center">
+                  <div class="w-10 h-10 rounded-full bg-info bg-opacity-10 flex items-center justify-center mr-3">
+                    <i class="fas fa-ice-cream text-info"></i>
+                  </div>
+                  <div>
+                    <p class="font-medium">Order #ORD-00127</p>
+                    <p class="text-sm text-gray-500">David Wilson • 4:15 PM</p>
+                  </div>
+                </div>
+                <div class="flex items-center space-x-4">
+                  <div>
+                    <p class="text-sm font-medium">$15.25</p>
+                    <p class="text-xs text-gray-500">1 item</p>
+                  </div>
+                  <span class="status-badge bg-gray-500 text-white">Cancelled</span>
+                  <button class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-ellipsis-v"></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+  
+  <script>
+    // Simple animation for order cards when page loads
+    document.addEventListener('DOMContentLoaded', () => {
+      const orderCards = document.querySelectorAll('.order-card');
+      
+      orderCards.forEach((card, index) => {
+        setTimeout(() => {
+          card.style.opacity = '1';
+          card.style.transform = 'translateY(0)';
+        }, index * 100);
+      });
     });
   </script>
- 
-  <script src="script.js"></script>
 </body>
 </html>
