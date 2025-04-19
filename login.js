@@ -1,5 +1,6 @@
 import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
 
+// Initialize Supabase client
 const supabase = createClient(
   "https://pzmjrsqltbsuuunocbvu.supabase.co",
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB6bWpyc3FsdGJzdXV1bm9jYnZ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDQ3MzI4MzUsImV4cCI6MjA2MDMwODgzNX0.Rh40SalOAVZQm-CLdOgmsf5EANli5be319BM8sI8zYQ"
@@ -14,13 +15,20 @@ form.addEventListener("submit", async (e) => {
 
   const email = document.getElementById("email").value.trim();
   const password = document.getElementById("password").value.trim();
+  const robotCheckbox = document.getElementById("robotCheckbox").checked;
 
   if (!email || !password) {
     message.textContent = "Please fill in all fields.";
     return;
   }
 
+  if (!robotCheckbox) {
+    message.textContent = "Please verify that you are not a robot.";
+    return;
+  }
+
   try {
+    // Attempt to sign in with email and password
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
     if (error) {
@@ -35,25 +43,7 @@ form.addEventListener("submit", async (e) => {
       return;
     }
 
-    // ✅ Generate 6-digit OTP
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
-
-    // 🔐 Insert OTP to verifications table
-    const { error: insertError } = await supabase.from("verifications").insert({
-      user_id: data.user.id,
-      code: otp,
-    });
-
-    if (insertError) {
-      message.textContent = "Failed to generate OTP.";
-      return;
-    }
-
-    // ✉️ Simulate sending OTP via email (log it to console for now)
-    console.log("Your OTP is:", otp);
-    localStorage.setItem("verify_user_id", data.user.id);
-    window.location.href = "otp.html";
-
+    window.location.href = "dashboard.html"; // Redirect to dashboard or homepage
   } catch (err) {
     message.textContent = "Unexpected error.";
     console.error(err);
